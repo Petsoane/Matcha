@@ -1,0 +1,20 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="content-sections">
+    {% for user in users %}
+    <article class="media content-section">
+            <img class="article-img rounded" src="{{ url_for('static', filename='profile_pics/' + user['image_name']) }}" alt="Profile Pic">
+                <div class="media-body">
+                  <div class="article-metadata border-bottom">
+                    <a class="mr-2" href="#">{{ user['username'] }}</a>
+                    <small class="text-muted">{{ user['email'] }}</small>
+                  </div>
+                  <h2><a class="article-title" href="#">{{ user['firstname'] }}</a></h2>
+                  <p class="article-content">{{ user['sex'] }}</p>
+                </div>
+              </article>
+    {% endfor %}
+</div>
+{% endblock content %}
