@@ -20,3 +20,11 @@ class DB:
 	# Get all the users from the database
 	def users(self, query={}):
 		return self.__users.find(query)
+
+	# Update the users information
+	def update_user(self, user_id, values):
+		items = values.items()
+		for key, value in items:
+			if key == '_id':
+				continue
+			self.__users.update_one({'_id' : user_id}, {'$set': { key: value}})

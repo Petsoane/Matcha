@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <div class="media">
+        <img src="{{ url_for('static', filename='profile_pics/' + user['image_name'])}}" alt="profile"
+            class="rounded-circle account-img">
+        <div class="media-body">
+            <h2 class='account-heading'>{{ user['username'] }}</h2>
+            <p class="text-muted text-secondary">{{ user['email'] }}</p>
+        </div>
+    </div>
+    <div class="btn-group" role="group" aria-label="Basic example">
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#user_interests"
+            aria-expanded="false" aria-controls="collapse">Interests</button>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#user_details"
+            aria-expanded="false" aria-controls="collapse">
+            Change details
+        </button>
+    </div>
+</div>
+
+<div class="collapse" id="user_details">
+    <div class="container">
+        <form action="" method='POST' class="needs-validation" novalidate enctype="multipart/form-data">
+
+            <fieldset class="form-group">
+                <legend class="form-goup border-bottom">
+                    Account
+                </legend>
+                <div class="form-goup">
+                    <label class="form-control-label" for="UserName">User Name</label>
+                    <input type="text" id='UserName' class="form-control form-control-lg" name="username"
+                        value="{{ user['username'] }}" required>
+                    <div class="invalid-feedback">
+                        the username is requires
+                    </div>
+                </div>
+                <div class="form-goup">
+                    <label class="form-control-label" for="firstName">First Name</label>
+                    <input type="text" id='firstName' class="form-control form-control-lg" name="firstname"
+                        value="{{ user['firstname'] }}" required>
+                    <div class="invalid-feedback">
+                        please enter a firstname
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label">Last Name</label>
+                    <input type="text" id="lastName" class="form-control form-control-lg" name="lastname"
+                        value="{{ user['lastname'] }}" required>
+                    <div class="invalid-feedback">
+                        please enter your lastname
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label">Email</label>
+                    <input type="email" id="email" class="form-control form-control-lg" name="email"
+                        value="{{ user['email'] }}" required>
+                    <div class="invalid-feedback">
+                        Please enter a valid email address
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label">Change profile pic</label>
+                    <input type='file' class="form-control-file" name='image' accept="image/*">
+                </div>
+            </fieldset>
+            <div class="form-group">
+                <input type="submit" value="update" name="submit" class="btn btn-outline-info btn-md">
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="collapse" id='user_interests'>
+    <div class="container">
+        {% for interest in user['insterests'] %}
+        <div class="card" style="width: 8rem; float:left;">
+            <img src="{{ url_for('static', filename='interests/' + interest['image'])}}" class="card-img-top" alt="...">
+            <div class="card-body">
+                {{ interest['name'] }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock content %}
+
+
+{% block js %}
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+{% endblock js %}
