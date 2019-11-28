@@ -9,9 +9,12 @@ class DB:
 		self.__users = db['users']
 		self.__posts = db['posts']
 	
-	def get_user(self, query):
+	def get_user(self, query, fields=None):
 		''' This function will get a single users information'''
-		user = self.__users.find_one(query)
+		if not fields:
+			user = self.__users.find_one(query)
+		else:
+			user = self.__users.find_one(query, fields)
 
 		return user
 	
@@ -31,6 +34,13 @@ class DB:
 				continue
 			self.__users.update_one({'_id' : user_id}, {'$set': { key: value}})
 
+
+	# Update the flirts and flirted
+	def update_flirts(self, user_id, change):
+		query = {'_id' : user_id}
+		new_values = {'$set': change}
+
+		self.__users.update_one(query, new_values)
 
 	# Add a post to the posts table
 	def add_post(self, post):

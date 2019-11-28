@@ -2,7 +2,7 @@ from matcha import db, socket, app
 from functools import wraps
 from datetime import datetime
 from flask import render_template, redirect, request, abort, url_for, flash, session
-import os, secrets
+import os, secrets, re, bcrypt
 from werkzeug import secure_filename
 from PIL import Image
 
@@ -31,18 +31,34 @@ def login_required(f):
         return f(*args, **kwargs)
     return wrapper
 
+def finish_profile(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        print(session['username'])
+        user = db.get_user({'username':session.get('username')})
+        if user['completed'] == 0:
+            flash("Please finish your profile first", 'info')
+            return redirect( url_for('profile', next=request.url))
+        return f(*args, **kwargs)
+    return wrapper
+
 
 # Create the route for the home page
 @app.route('/')
+@login_required
+@finish_profile
 def home():
     posts = db.get_posts()
-    print(posts)
     return render_template('home.html', logged_in=session.get('username'), posts=posts)
 
+
 @app.route('/users')
+@login_required
+@finish_profile
 def users():
     users = list(db.users())
-    return render_template('users.html', logged_in=session.get('username'), users=users)
+    current_user = db.get_user({'username' : session.get('username')})
+    return render_template('users.html', logged_in=session.get('username'), users=users, current_user=current_user)
 
 
 # Handle the user registration
@@ -56,12 +72,21 @@ def register():
         'lastname' : '',
         'email' : '',
         'password' : '',
+        'gender': '',
         'sex': 'bi-sexual',
+        'bio': '',
         'interests': [],
-        'flirts' : [],
-        'flirted' : [],
+        'flirts' : [],      # like
+        'flirted' : [],     # liked
         'matched' : [],
-        'image_name': 'default.png'
+        'views' : [],
+        'fame-rating': 0,
+        'location': [],
+        'image_name': 'default.png',
+        'token': secrets.token_hex(16),
+        'completed': 0,
+        'email_confirmed': 0
+
     }
 
     if request.method == 'POST':
@@ -70,15 +95,36 @@ def register():
         details['lastname'] = request.form.get('lastname')
         details['email'] = request.form.get('email')
         details['password'] = request.form.get('password')
+        passwd_confirm = request.form.get('password_confirm')
 
+        # Check the users username
         if not details['username']:
             errors.append('The username cannot be empty')
+        if not re.match('^[A-Za-z][A-Za-z0-9]{2,49}$', details['username']):
+            errors.append('The username must be an alpha numeric value')
         if db.get_user({'username': details['username']}):
             errors.append('The username is already taken')
+        # Check the users email
         if db.get_user({'email' : details['email']}):
             errors.append('The email is already taken!')
+        if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,100}$', details['email']):
+            errors.append('invalid email format')
+        # check the users password
+        if not re.match('[A-Za-z0-9]', details['password']):
+            errors.append('The password must have an uppercase, lowercase and a digit')
+        if passwd_confirm != details['password']:
+            errors.append('The two passwords do not match')
+        # Check the users firstname
+        if not re.match('^[A-Z][a-zA-Z-]{1,24}$', details['firstname']):
+            errors.append('A name but start with a capital letter, and a have atlease 25 characters')
+        # Check the user lastname
+        if not re.match('^[A-Z][a-zA-Z-]{1,24}$', details['lastname']):
+            errors.append('The lastname must start with a capital letter, and have 2-24 charaters')
+
         
         if not errors:
+            salt = bcrypt.gensalt()
+            details['password'] = bcrypt.hashpw(details['password'].encode('utf-8'), salt)
             db.register_user(details)
             flash ("Successful registration", 'success')
             return redirect( url_for('login') )
@@ -101,14 +147,14 @@ def login():
     if request.method == 'POST':
         details['username'] = request.form.get('username')
         details['password'] = request.form.get('password')
-        query = [ 
-            { 'username': details['username'] },
-            {'password' : details['password']} 
-        ]
+        user = db.get_user({'username': details['username']}, {'password': 1})
+        print(user)
 
-        if not (db.get_user({'$and': query})):
-            errors.append('Incorrect username and email combo')
-        
+        if not user:
+            errors.append("Incorrect username or password")            
+        elif not bcrypt.checkpw(details['password'].encode('utf-8'), user['password']):
+            errors.append('Incorrect username or password') 
+
         if not errors:
             session['username'] = details['username']
             flash('Successful login', 'success')
@@ -171,6 +217,7 @@ def profile():
 # Route for the user posts
 @app.route('/post/new', methods=['GET', 'POST'])
 @login_required
+@finish_profile
 def new_post():
     user = db.get_user({'username':session.get('username')})
     post = {
@@ -224,3 +271,23 @@ def delete_post(post_id):
         abort(403)
     db.delete_post(post)
     return redirect( url_for('home') )
+
+
+@app.route('/user/flirt/<string:username>', methods=['GET', 'POST'])
+@login_required
+def flirt(username):
+    flirter = db.get_user({'username':session.get('username')}, {'flirts': 1, 'username' : 1})
+    print("flirter", flirter)
+    flirtee = db.get_user({'username':username}, {'flirted': True, 'username' : 1})
+    print('flirtee', flirtee)
+
+    # Flirted is used for people who have liked you.
+    flirtee['flirted'].append(session.get('username'))
+    print("flirtee", flirtee)
+    # Flirts is for users who you have like
+    flirter['flirts'].append(flirtee['username'])
+    
+    db.update_flirts(flirter['_id'], {'flirts': flirter['flirts']})
+    db.update_flirts(flirtee['_id'], {'flirted': flirtee['flirted']})
+
+    return redirect( url_for('users') )

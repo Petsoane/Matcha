@@ -12,8 +12,8 @@
         </div>
     </div>
     <div class="btn-group" role="group" aria-label="Basic example">
-        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#user_interests"
-            aria-expanded="false" aria-controls="collapse">Interests</button>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#bio"
+            aria-expanded="false" aria-controls="collapse">Bio</button>
         <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#user_details"
             aria-expanded="false" aria-controls="collapse">
             Change details
@@ -71,6 +71,54 @@
             </div>
         </form>
     </div>
+</div>
+
+<div class="collapse" id='bio'>
+        <div class="content-section">
+                <form method="POST" action="">
+                    <div class="container" style="display: flex;flex-direction: column;">
+                        <h1>My Profile</h1>
+                        <p>Before we can match you, you need to complete your profile</p>
+                        <hr>
+                        <form action="" method="POST">
+                            <label for="gender"><b>I identify as a:</b></label>
+                            <select name="gender">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                            <br/>
+                            <label for="sexo"><b>My sexual orientation is:</b></label>
+                            <select name="sexo">
+                                <option value="heterosexual">HeteroSexual</option>
+                                <option value="homosexual">HomoSexual</option>
+                                <option value="bisexual">Bi-Sexual</option>
+                            </select>
+                            <br/>
+                            <fieldset>
+                                <label for="interests"><b>My interests are:</b></label> <br/>
+                                <input type="checkbox" name="interests" value="pets">#Animals<br>
+                                <input type="checkbox" name="interests" value="cheat">#Cheaters<br>
+                                <input type="checkbox" name="interests" value="love">#Lookingforlove<br>
+                                <input type="checkbox" name="interests" value="quickie">#Quickie<br>
+                                <input type="checkbox" name="interests" value="travel">#Travel<br>
+                                <input type="checkbox" name="interests" value="mat">#Menaretrash<br>
+                                <input type="checkbox" name="interests" value="nsa">#NSA<br>
+                            </fieldset>
+                            <br/>
+                            <label for="location"><b>Tell us about yourself:</b></label>
+                            <textarea rows="4" cols="50"></textarea>
+                            <br/>
+                            <label for="location"><b>I am located in:</b></label>
+                            <select name="location">
+                              <!-- need to find location -->
+                            </select>
+                        </form>
+                        <hr>
+                        <button type="submit" class="registerbtn" name='submit' value='bio'>Done</button>
+                    </div>
+            
+                </form>
+            </div>
 </div>
 
 <div class="collapse" id='user_interests'>

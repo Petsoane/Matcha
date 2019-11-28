@@ -1,20 +1,41 @@
-
 {% extends 'base.html' %}
 
 {% block content %}
 <div class="content-sections">
-    {% for user in users %}
-    <article class="media content-section">
-            <img class="article-img rounded" src="{{ url_for('static', filename='profile_pics/' + user['image_name']) }}" alt="Profile Pic">
-                <div class="media-body">
-                  <div class="article-metadata border-bottom">
-                    <a class="mr-2" href="#">{{ user['username'] }}</a>
-                    <small class="text-muted">{{ user['email'] }}</small>
-                  </div>
-                  <h2><a class="article-title" href="#">{{ user['firstname'] }}</a></h2>
-                  <p class="article-content">{{ user['sex'] }}</p>
-                </div>
-              </article>
-    {% endfor %}
+  {% for user in users %}
+  {% if logged_in != user['username'] %}
+  <article class="media content-section">
+    <img class="article-img rounded" src="{{ url_for('static', filename='profile_pics/' + user['image_name']) }}"
+      alt="Profile Pic">
+    <div class="media-body">
+      <div class="article-metadata border-bottom">
+        <a class="mr-2" href="#">{{ user['username'] }}</a>
+        <small class="text-muted">{{ user['email'] }}</small>
+
+        <!-- The like and comment system -->
+        {% if logged_in in user['flirted'] %}
+        <div>
+          {% if user['username'] in current_user['flirted'] %}
+          <a href="#" class='btn btn-outline-info btn-sm m-1 disabled'>Chat</a> 
+          {% else %}
+          <a href="#" class='btn btn-secondary btn-sm m-1 disabled'>Pending</a>
+          {% endif %}
+        </div>
+        {% else %}
+        <div>
+          {% if user['username'] in current_user['flirted'] %}
+          <a href="{{ url_for('flirt', username=user['username']) }}" class='btn btn-secondary btn-sm m-1'>Flirt Back</a>
+          {% else%}
+          <a href="{{ url_for('flirt', username=user['username']) }}" class='btn btn-secondary btn-sm m-1'>Flirt</a>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+      <h2><a class="article-title" href="#">{{ user['firstname'] }}</a></h2>
+      <p class="article-content">{{ user['sex'] }}</p>
+    </div>
+  </article>
+  {% endif %}
+  {% endfor %}
 </div>
 {% endblock content %}
