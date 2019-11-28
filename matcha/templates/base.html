@@ -33,9 +33,9 @@
                     <!-- Navbar Right Side -->
                     <div class="navbar-nav">
                         {% if logged_in %}
-                        <a class="nav-item nav-link" href="#">Post</a>
+                        <a class="nav-item nav-link" href="{{  url_for('new_post') }}">Post</a>
                         <a href="{{ url_for('profile') }}" class="nav-item nav-link">Profile</a>
-                        <a href="#" class="nav-item nav-link">Logout</a>
+                        <a href="{{ url_for('logout') }}" class="nav-item nav-link">Logout</a>
                         {% else %}
                         <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
                         <a class="nav-item nav-link" href="{{ url_for('register') }}">Register</a>
